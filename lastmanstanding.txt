@@ -2,7 +2,19 @@
 {
         "base"          "base"
         "title"         "Last Man Standing"
-        "maps"          ""
+        "maps"          "^lsm_"
         "menusystem"    "1"
         "workshopid"    ""
+        
+        "settings"
+        {
+                1
+                {
+                        "name"          "lsm_test"
+                        "text"          "Test"
+                        "help"          "Testing"
+                        "type"          "numeric"
+                        "default"       "1"
+                }
+        }
 }
