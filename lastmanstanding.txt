@@ -1,0 +1,8 @@
+"lastmanstanding"
+{
+        "base"          "base"
+        "title"         "Last Man Standing"
+        "maps"          ""
+        "menusystem"    "1"
+        "workshopid"    ""
+}
