@@ -4,13 +4,15 @@ AddCSLuaFile("shared.lua")
 include("shared.lua")
 include("player.lua")
 
-numPlys = 0
-targets = {}
+timeWarmUp = 10 -- How long the warm up stage is (in seconds)
+
+numPlys = 0 -- Number of valid players
+targets = {} -- Table holding all players and their targets
 
 function GM:Initialize()
   self.BaseClass:Initialize(self)
   
-  timer.Create("Warmup", 10, 1, function() DoRoundStart() end)
+  timer.Create("Warm up", timeWarmUp, 1, function() DoRoundStart() end) -- Start warm up sequence
 end
 
 function GM:Think()
@@ -20,7 +22,7 @@ function GM:PlayerConnect(ply, adress)
 end
 
 --
--- Player Death
+-- Player Death - Runs when a player dies
 -- ply - dying player, wep - entity used to kill, atk - killing player
 --
 function GM:PlayerDeath(ply, wep, atk)
@@ -34,34 +36,45 @@ function GM:PlayerDeath(ply, wep, atk)
     RemovePlayer(ply) -- Remove the dying player from the table.
   else
     print("It was not their target!")
-    SetPlayerTarget(GetPlayerTargetedBy(ply), PlayerTarget(ply)) -- Give the dying players target to the player targeting the dying player
+    -- SetPlayerTarget(GetPlayerTargetedBy(ply), PlayerTarget(ply)) -- Give the dying players target to the player targeting the dying player
     RemovePlayer(ply) -- Remove the dying player from table.
   end
   
   if (table.Count(targets) == 1) then
-    print("["..Player(atk).."]["..atk:Nick().."] is the last man standing!") -- Print last standing player
+    print("["..PlayerID(atk).."]["..atk:Nick().."] is the last man standing!") -- Print last standing player
   else
-    print("New Targets:")
-    PrintTargets()
+    print("New Targets:") 
+    PrintTable(targets)
   end
 end
 
+--
+-- Do Round Start - Actions to do at the start of each round
+--
 function DoRoundStart()
-  numPlys = team.NumPlayers(0)
-  targets = AssignTargets()
+  numPlys = team.NumPlayers(0) -- Checks how many valid players exist
+  targets = AssignTargets() -- Assigns targets to the appropriate variable
   
   print("Initial Targets:")
-  PrintTargets()
+  PrintTable(targets) -- Print targets
 end
 
+--
+-- Assign Targets - Assigns random targets to each player
+--
 function AssignTargets()
-  local plys = team.GetPlayers(0)
-  local targs = team.GetPlayers(0)
-  local rng = math.random(numPlys)
-  local result = {}
+  local plys = team.GetPlayers(0) -- Table holding valid players
+  local targs = team.GetPlayers(0) -- Table holding valid targets
+  local rng = math.random(numPlys) -- Random value used to pick random players
+  local result = {} -- The resulting table of targets
   
-  for i = 1, numPlys, 1 do
-    table.Add(result, {[i] = {Player = plys[i], Target = targs[rng]}})
+  for i = 1, numPlys, 1 do -- Do actions for each valid player
+    rng = math.random(numPlys) -- Generate a random number
+    while (rng == i or targs[rng] == nil) do
+      rng = math.random(numPlys) print("["..i.."]["..plys[i]:Nick().."] New target")
+    end
+    table.Add(result, {[i] = {Player = plys[i], Target = targs[rng]}}) -- Assign target to player based on the random number
+    targs[rng] = nil -- Remove assigned target from valid targets
   end
   
   return result
@@ -125,12 +138,12 @@ end)
 concommand.Add("lsm_round_new", function(ply, cmd, args, str)
   DoRoundStart()
 end)
-concommand.Add("lsm_newtargets", function(ply, cmd, args, str)
+concommand.Add("lsm_targets_new", function(ply, cmd, args, str)
   targets = AssignTargets()
   print("New Targets:")
-  PrintTargets()
+  PrintTable(targets)
 end)
-concommand.Add("lsm_printtargets", function(ply, cmd, args, str)
+concommand.Add("lsm_targets", function(ply, cmd, args, str)
   print("Current Targets:")
-  PrintTargets()
+  PrintTable(targets)
 end)
