@@ -8,13 +8,5 @@
         
         "settings"
         {
-                1
-                {
-                        "name"          "lsm_test"
-                        "text"          "Test"
-                        "help"          "Testing"
-                        "type"          "numeric"
-                        "default"       "1"
-                }
         }
 }
